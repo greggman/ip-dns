@@ -1,0 +1,24 @@
+{
+  "name": "ip-dns",
+  "version": "0.0.1",
+  "description": "ip-dns",
+  "main": "index.js",
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha --recursive"
+  },
+  "keywords": [
+    "dns"
+  ],
+  "author": "Gregg Tavares",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "native-dns": "^0.7.0",
+    "rfc-3548-b32": "0.0.2"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "mocha": "^2.4.5",
+    "should": "^8.3.1"
+  }
+}
