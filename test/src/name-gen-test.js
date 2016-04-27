@@ -67,13 +67,13 @@ describe('NameGen', function() {
       ].forEach(function(bad) {
         var options = {
           id: "foobar1245",
-          i4: "abc",
+          i4: "1.2.4.5",
           x4: "123.34.56.12",
         };
         options[key] = bad;
-        (function() {
-          nameGen.gen(options).should.throw();
-        }());
+        (() => {
+          nameGen.gen(options);
+        }).should.throw();
       });
     });
   });
@@ -81,7 +81,6 @@ describe('NameGen', function() {
   it('should throw with bad ip6 address', function() {
     ['i6', 'x6'].forEach(function(key) {
       [
-        'abc',
         '1234:defg',
         '1:2:3:4:5:6:7:8:9',
         '1:2:3:4/40',
@@ -94,9 +93,9 @@ describe('NameGen', function() {
           x6: "1234:45::12:def",
         };
         options[key] = bad;
-        (function() {
-          nameGen.gen(options).should.throw();
-        }());
+        (() => {
+          nameGen.gen(options);
+        }).should.throw();
       });
     });
   });
@@ -109,9 +108,9 @@ describe('NameGen', function() {
       i6: "1234:4567",
       x6: "1234:45::12:def",
     };
-    (function() {
-      nameGen.gen(options).should.throw();
-    }());
+    (() => {
+      nameGen.gen(options);
+    }).should.throw();
   });
 
 });
