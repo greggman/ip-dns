@@ -1,8 +1,5 @@
 'use strict';
 
-const crypto = require('crypto');
-const isValid = require('./is-valid');
-const base32 = require('rfc-3548-b32');
 const NameGen = require('./name-gen');
 
 /**
@@ -50,7 +47,7 @@ class NameParser {
       version: parseInt(m[1]),
       external: m[2] === 'x',
       id: m[3],
-    }
+    };
   }
 
   gen(options) {

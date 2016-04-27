@@ -1,3 +1,4 @@
+'use strict';
 
 var g_ip4RE = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
 var g_hexRE = /^[A-Fa-f0-9]*$/;
@@ -25,7 +26,8 @@ function isValidIp6Address(ip6) {
   if (parts.length > 8) {
     return false;
   }
-  for (var i = 0, len = parts.length; i < len; ++i) {
+  var len = parts.length;
+  for (var i = 0; i < len; ++i) {
     var part = parts[i];
     if (part.length > 4 || !isHex(part)) {
       return false;

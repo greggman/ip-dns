@@ -1,5 +1,7 @@
+'use strict';
+
 var NameGen = require('../../src/name-gen');
-var should = require('should');
+var should = require('should');  // eslint-disable-line
 
 describe('NameGen', function() {
 
@@ -69,7 +71,9 @@ describe('NameGen', function() {
           x4: "123.34.56.12",
         };
         options[key] = bad;
-        (() => { nameGen.gen(options).should.throw(); });
+        (function() {
+          nameGen.gen(options).should.throw();
+        }());
       });
     });
   });
@@ -90,7 +94,9 @@ describe('NameGen', function() {
           x6: "1234:45::12:def",
         };
         options[key] = bad;
-        (() => { nameGen.gen(options).should.throw(); });
+        (function() {
+          nameGen.gen(options).should.throw();
+        }());
       });
     });
   });
@@ -103,7 +109,9 @@ describe('NameGen', function() {
       i6: "1234:4567",
       x6: "1234:45::12:def",
     };
-    (() => { nameGen.gen(options).should.throw(); });
+    (function() {
+      nameGen.gen(options).should.throw();
+    }());
   });
 
 });

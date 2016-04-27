@@ -1,5 +1,7 @@
+'use strict';
+
 var isValid = require('../../src/is-valid');
-var should = require('should');
+var should = require('should');  // eslint-disable-line
 
 describe('is-valid', function() {
 

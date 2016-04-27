@@ -1,17 +1,12 @@
+'use strict';
+
 var NameParser = require('../../src/name-parser');
 var NameGen = require('../../src/name-gen');
-var should = require('should');
+var should = require('should');  // eslint-disable-line
 
 describe('NameParser', function() {
 
     var suffix = 'foo.com';
-    var ipInfo = {
-       //           1111111111222222222233333333334444444444555555555566666
-       // 01234567890123456789012345678901234567890123456789012345678901234
-      id: 'foobar1234',
-      i4: '111.22.3.44',
-      x4: '222.33.4.55',
-    };
     var nameInfo = {
       version: 34,
       id: 'foobar1234',
@@ -46,7 +41,7 @@ describe('NameParser', function() {
       var name = 'v34x' + expectedName + '.' + suffix;
       var np = new NameParser(suffix);
       (() => {
-        var info = np.parse(name.toLowerCase());
+        np.parse(name.toLowerCase());
       }).should.throw();
     });
 
@@ -54,7 +49,7 @@ describe('NameParser', function() {
       var name = 'v34x' + expectedName + '.' + suffix;
       var np = new NameParser(suffix);
       (() => {
-        var info = np.parse('k' + name.substr(1));
+        np.parse('k' + name.substr(1));
       }).should.throw();
     });
 
@@ -62,7 +57,7 @@ describe('NameParser', function() {
       var name = 'v34x' + expectedName + '.' + suffix;
       var np = new NameParser(suffix);
       (() => {
-        var info = np.parse(name.substr(0, 3) + 'p' + name.substr(4));
+        np.parse(name.substr(0, 3) + 'p' + name.substr(4));
       }).should.throw();
     });
 
@@ -70,7 +65,7 @@ describe('NameParser', function() {
       var name = 'v34x' + expectedName + '.' + 'bar.com';
       var np = new NameParser(suffix);
       (() => {
-        var info = np.parse(name);
+        np.parse(name);
       }).should.throw();
     });
 });
