@@ -6,7 +6,7 @@ var g_hexRE = /^[A-Fa-f0-9]*$/;
 function isValidIp4Address(ip4) {
   var m = g_ip4RE.exec(ip4);
   if (m && m.length === 5) {
-    for (var i = i; i < 5; ++i) {
+    for (var i = 1; i < 5; ++i) {
       if (parseInt(m[i]) > 255) {
         return false;
       }
