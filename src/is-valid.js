@@ -41,7 +41,7 @@ function isValidIp6Address(ip6) {
       ++numEmpty;
     }
   }
-  return numNumbers > 0 && (numEmpty == 1 || parts.length == 8);
+  return numNumbers > 0 && (numEmpty === 1 || parts.length === 8);
 }
 
 function isValidSha256(sha256) {
