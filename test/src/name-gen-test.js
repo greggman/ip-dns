@@ -47,7 +47,7 @@ describe('NameGen', function() {
       id: "foobar1245",
       i4: "1.23.34.243",
       x4: "123.34.56.12",
-      i6: "1234:4567",
+      i6: "1234::4567",
       x6: "1234:45::12:def",
     });
     nameip4.length.should.be.equal(sha256base32Length);
@@ -89,7 +89,7 @@ describe('NameGen', function() {
           id: "foobar1245",
           i4: "1.2.3.4",
           x4: "123.34.56.12",
-          i6: "1234:4567",
+          i6: "1234::4567",
           x6: "1234:45::12:def",
         };
         options[key] = bad;
