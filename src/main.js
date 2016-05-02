@@ -56,7 +56,7 @@ function startDNSServer() {
   let tcpOptions = {
     address: "0.0.0.0",
     port: 4444,
-    tcp: true,
+    type: 'tcp',
     db: dnsdb,
   };
   let tcpDnsServer = new DNSServer(tcpOptions);

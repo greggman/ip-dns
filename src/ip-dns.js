@@ -79,7 +79,8 @@ class DNSServer extends EventEmitter {
     //for (let key in dns.consts) {
     //  log("dns.consts.", key);
     //}
-    var server = options.tcp ? dns.createTCPServer() : dns.createUDPServer();
+    var server = options.type === 'tcp' ? dns.createTCPServer() : dns.createUDPServer();
+    this._server = server;
 
     var port = options.port || 53;
     var address = options.address || '127.0.0.1';
