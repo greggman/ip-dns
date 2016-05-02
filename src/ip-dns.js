@@ -91,7 +91,7 @@ class DNSServer extends EventEmitter {
         debug("-> A");
         return dnsdb.get(question.name, 'A')
         .then((dnsRecord) => {
-          response.answer.push(dns.A({  // eslint-disable-line
+          response.answer.push(new dns.A({
             name: question.name,
             address: dnsRecord.content,
             ttl: ttl,
@@ -102,7 +102,7 @@ class DNSServer extends EventEmitter {
         debug("-> AAAA");
         return dnsdb.get(question.name, 'AAAA')
         .then((dnsRecord) => {
-          response.answer.push(dns.AAAA({  // eslint-disable-line
+          response.answer.push(new dns.AAAA({
             name: question.name,
             address: dnsRecord.content,
             ttl: ttl,
@@ -115,7 +115,7 @@ class DNSServer extends EventEmitter {
         .then((dnsRecord) => {
           var parts = dnsRecord.content.match(split255RE);
           parts.forEach((part) => {
-            response.answer.push(dns.TXT({  // eslint-disable-line
+            response.answer.push(new dns.TXT({
               name: question.name,
               data: [part],
               ttl: ttl,

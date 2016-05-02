@@ -28,7 +28,7 @@ class FakeDNSDb {
 }
 
 function dnsRequest(options, question, callback) {
-  var req = dns.Request({
+  var req = new dns.Request({
     question: question,
     server: options,
     timeout: 10000,  // longer than mocha
@@ -39,14 +39,14 @@ function dnsRequest(options, question, callback) {
   req.on('message', (err, result) => {
     gotMessage = true;
     should.not.exist(err);
-    should.not.exist(answer)
+    should.not.exist(answer);
     answer = JSON.parse(JSON.stringify(result.answer));
   });
 
   req.on('end', function() {
     gotMessage.should.be.true();
     callback(answer);
-  })
+  });
 
   req.send();
 }
@@ -56,7 +56,7 @@ describe('IPDns', () => {
   function sharedTests(dnsServer, options) {
 
     it('responds to A requests', (done) => {
-      dnsRequest(options, dns.Question({
+      dnsRequest(options, new dns.Question({
         name: "foobar.com",
         type: 'A',
       }), (answer) => {
@@ -67,7 +67,7 @@ describe('IPDns', () => {
     });
 
     it('responds to AAAA requests', (done) => {
-      dnsRequest(options, dns.Question({
+      dnsRequest(options, new dns.Question({
         name: "foobar.com",
         type: 'AAAA',
       }), (answer) => {
@@ -78,7 +78,7 @@ describe('IPDns', () => {
     });
 
     it('responds to TXT requests', (done) => {
-      dnsRequest(options, dns.Question({
+      dnsRequest(options, new dns.Question({
         name: "foobar.com",
         type: 'TXT',
       }), (answer) => {
@@ -100,7 +100,7 @@ describe('IPDns', () => {
     };
 
     before((done) => {
-      options.db = new FakeDNSDb();;
+      options.db = new FakeDNSDb();
       dnsServer = new DNSServer(options);
       dnsServer.on('listening', done);
     });
@@ -124,7 +124,7 @@ describe('IPDns', () => {
     };
 
     before((done) => {
-      options.db = new FakeDNSDb();;
+      options.db = new FakeDNSDb();
       dnsServer = new DNSServer(options);
       dnsServer.on('listening', done);
     });
