@@ -3,6 +3,7 @@
 const DNSServer = require('./ip-dns');
 const fs = require('fs');
 const path = require('path');
+const DNSDb = require('./dns-db');
 
 var log = console.log.bind(console);  // eslint-disable-line
 var error = console.error.bind(console);  // eslint-disable-line
@@ -40,9 +41,13 @@ function reportListening(options) {
 
 function startDNSServer() {
   log("--start dns server");
+
+  var dnsdb = new DNSDb();
+
   var udpOptions = {
     address: "0.0.0.0",
     port: 4444,
+    db: dnsdb,
   };
   let udpDnsServer = new DNSServer(udpOptions);
   udpDnsServer.on('listening', () => {
@@ -52,6 +57,7 @@ function startDNSServer() {
     address: "0.0.0.0",
     port: 4444,
     tcp: true,
+    db: dnsdb,
   };
   let tcpDnsServer = new DNSServer(tcpOptions);
   tcpDnsServer.on('listening', () => {

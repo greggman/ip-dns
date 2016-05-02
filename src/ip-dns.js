@@ -34,69 +34,13 @@ const debug = require('debug')('ip-dns');
 const dns = require('native-dns');
 const EventEmitter = require('events').EventEmitter;
 const fs = require('fs');
-const DNSDb = require('./dns-db');
 
 var log = console.log.bind(console);  // eslint-disable-line
 var error = console.error.bind(console);  // eslint-disable-line
 var warn = console.warn.bind(console);  // eslint-disable-line
 var ttl = 1;
 
-var dnsdb = new DNSDb();
-
 var split255RE = /(.{1,255})/g;
-
-var inTypeHandlers = {
-  A: (question, response /* , dns, request*/) => {
-    debug("-> A");
-    return dnsdb.get(question.name, 'A')
-    .then((dnsRecord) => {
-      response.answer.push(dns.A({  // eslint-disable-line
-        name: question.name,
-        address: dnsRecord.content,
-        ttl: ttl,
-      }));
-    });
-  },
-  AAAA: (question, response /* dns, request */) => {
-    debug("-> AAAA");
-    return dnsdb.get(question.name, 'AAAA')
-    .then((dnsRecord) => {
-      response.answer.push(dns.AAAA({  // eslint-disable-line
-        name: question.name,
-        address: dnsRecord.content,
-        ttl: ttl,
-      }));
-    });
-  },
-  TXT: (question, response /* dns, request */) => {
-    debug("-> TXT");
-    return dnsdb.get(question.name, 'TXT')
-    .then((dnsRecord) => {
-      var parts = dnsRecord.content.match(split255RE);
-      parts.forEach((part) => {
-        response.answer.push(dns.TXT({  // eslint-disable-line
-          name: question.name,
-          data: [part],
-          ttl: ttl,
-        }));
-      });
-    });
-  },
-};
-
-var classHandlers = {
-  IN: (q, response, dns, typeStr, request) => {
-    debug("-> IN");
-    var handler = inTypeHandlers[typeStr];
-    if (!handler) {
-      warn("no handler for type:", typeStr);
-      return;
-    }
-    handler(q, response, dns, request);
-  },
-  ANY: () => {
-  },
-};
 
 // options:
 //   address: ip address listen on: default 127.0.0.1
@@ -133,6 +77,60 @@ class DNSServer extends EventEmitter {
 
     var port = options.port || 53;
     var address = options.address || '127.0.0.1';
+    var dnsdb = options.db;
+
+    var inTypeHandlers = {
+      A: (question, response /* , dns, request*/) => {
+        debug("-> A");
+        return dnsdb.get(question.name, 'A')
+        .then((dnsRecord) => {
+          response.answer.push(dns.A({  // eslint-disable-line
+            name: question.name,
+            address: dnsRecord.content,
+            ttl: ttl,
+          }));
+        });
+      },
+      AAAA: (question, response /* dns, request */) => {
+        debug("-> AAAA");
+        return dnsdb.get(question.name, 'AAAA')
+        .then((dnsRecord) => {
+          response.answer.push(dns.AAAA({  // eslint-disable-line
+            name: question.name,
+            address: dnsRecord.content,
+            ttl: ttl,
+          }));
+        });
+      },
+      TXT: (question, response /* dns, request */) => {
+        debug("-> TXT");
+        return dnsdb.get(question.name, 'TXT')
+        .then((dnsRecord) => {
+          var parts = dnsRecord.content.match(split255RE);
+          parts.forEach((part) => {
+            response.answer.push(dns.TXT({  // eslint-disable-line
+              name: question.name,
+              data: [part],
+              ttl: ttl,
+            }));
+          });
+        });
+      },
+    };
+
+    var classHandlers = {
+      IN: (q, response, dns, typeStr, request) => {
+        debug("-> IN");
+        var handler = inTypeHandlers[typeStr];
+        if (!handler) {
+          warn("no handler for type:", typeStr);
+          return;
+        }
+        handler(q, response, dns, request);
+      },
+      ANY: () => {
+      },
+    };
 
     server.on('request', (request, response) => {
       //debug("response: " + address + " : " + request.question[0].name);
@@ -200,7 +198,6 @@ class DNSServer extends EventEmitter {
       this._checkForEtcResolvConf();
     }, 2000);
   }
-
 }
 
 module.exports = DNSServer;
