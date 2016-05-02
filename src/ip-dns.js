@@ -33,33 +33,64 @@
 const debug = require('debug')('ip-dns');
 const dns = require('native-dns');
 const fs = require('fs');
+const DNSDb = require('./dns-db');
 
 var log = console.log.bind(console);  // eslint-disable-line
 var error = console.error.bind(console);  // eslint-disable-line
+var ttl = 1;
+
+var dnsdb = new DNSDb();
+
+var split255RE = /(.{1,255})/g;
 
 var inTypeHandlers = {
-  A: (question /* , dns, request, response*/) => {
-    log("A");
-    var name = question.name;
-    log(name);
+  A: (question, response /* , dns, request*/) => {
+    log("-> A");
+    return dnsdb.get(question.name, 'A')
+    .then((dnsRecord) => {
+      response.answer.push(dns.A({
+        name: question.name,
+        address: dnsRecord.content,
+        ttl: 1,
+      }));
+    });
   },
-  AAAA: (/* question, dns, request, response */) => {
-    log("AAAA");
+  AAAA: (question, response /* dns, request */) => {
+    log("-> AAAA");
+    return dnsdb.get(question.name, 'AAAA')
+    .then((dnsRecord) => {
+      response.answer.push(dns.AAAA({
+        name: question.name,
+        address: dnsRecord.content,
+        ttl: 1,
+      }));
+    });
   },
-  TXT: (/* question, dns, request, response */) => {
-    log("TXT");
+  TXT: (question, response /* dns, request */) => {
+    log("-> TXT");
+    return dnsdb.get(question.name, 'TXT')
+    .then((dnsRecord) => {
+      var parts = dnsRecord.content.match(split255RE);
+      parts.forEach((part) => {
+        response.answer.push(dns.TXT({
+          name: question.name,
+          data: [part],
+          ttl: 1,
+        }));
+      });
+    });
   },
 };
 
 var classHandlers = {
-  IN: (q, dns, typeStr, request, response) => {
+  IN: (q, response, dns, typeStr, request) => {
     log("IN");
     var handler = inTypeHandlers[typeStr];
     if (!handler) {
       log("no handler for type:", typeStr);
       return;
     }
-    handler(q, dns, request, response);
+    handler(q, response, dns, request);
   },
   ANY: () => {
   },
@@ -83,13 +114,13 @@ class DNSServer {
 
   _start() {
     var options = this.options;
-    for (let key in dns) {
-      log("dns.", key);
-    }
-    for (let key in dns.consts) {
-      log("dns.consts.", key);
-    }
-    var server = dns.createServer();
+    //for (let key in dns) {
+    //  log("dns.", key);
+    //}
+    //for (let key in dns.consts) {
+    //  log("dns.consts.", key);
+    //}
+    var server = options.tcp ? dns.createTCPServer() : dns.createUDPServer();
 
     var port = options.port || 53;
 
@@ -97,7 +128,7 @@ class DNSServer {
 
     server.on('request', function(request, response) {
       //debug("response: " + address + " : " + request.question[0].name);
-      request.question.forEach((q, ndx) => {
+      var tasks = request.question.map((q, ndx) => {
         var classStr = dns.consts.QCLASS_TO_NAME[q.class];
         var typeStr = dns.consts.QTYPE_TO_NAME[q.type];
 
@@ -109,16 +140,18 @@ class DNSServer {
         var classHandler = classHandlers[classStr];
         if (!classHandler) {
           error("no handler for class:", classStr);
-          return;
+          return Promise.reject("no handler for class:" + classStr);
         }
-        classHandler(q, dns, typeStr, request, response);
+        return classHandler(q, response, dns, typeStr, request);
       });
-      response.answer.push(dns.A({    // eslint-disable-line
-        name: request.question[0].name,
-        address: address,
-        ttl: 1,
-      }));
-      response.send();
+      Promise.all(tasks)
+      .then(() => {
+        log("<- SEND");
+        response.send();
+      })
+      .catch((e) => {
+        error(e);
+      });
     });
 
     server.on('socketError', function(err /*, socket */) {
@@ -137,6 +170,9 @@ class DNSServer {
       server.serve(port);
     } catch (e) {
       error(e);
+      if (e.stack) {
+        error(e.stack);
+      }
     }
   }
 
