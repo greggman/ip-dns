@@ -38,6 +38,7 @@ const DNSDb = require('./dns-db');
 
 var log = console.log.bind(console);  // eslint-disable-line
 var error = console.error.bind(console);  // eslint-disable-line
+var warn = console.warn.bind(console);  // eslint-disable-line
 var ttl = 1;
 
 var dnsdb = new DNSDb();
@@ -46,7 +47,7 @@ var split255RE = /(.{1,255})/g;
 
 var inTypeHandlers = {
   A: (question, response /* , dns, request*/) => {
-    log("-> A");
+    debug("-> A");
     return dnsdb.get(question.name, 'A')
     .then((dnsRecord) => {
       response.answer.push(dns.A({
@@ -57,7 +58,7 @@ var inTypeHandlers = {
     });
   },
   AAAA: (question, response /* dns, request */) => {
-    log("-> AAAA");
+    debug("-> AAAA");
     return dnsdb.get(question.name, 'AAAA')
     .then((dnsRecord) => {
       response.answer.push(dns.AAAA({
@@ -68,7 +69,7 @@ var inTypeHandlers = {
     });
   },
   TXT: (question, response /* dns, request */) => {
-    log("-> TXT");
+    debug("-> TXT");
     return dnsdb.get(question.name, 'TXT')
     .then((dnsRecord) => {
       var parts = dnsRecord.content.match(split255RE);
@@ -85,10 +86,10 @@ var inTypeHandlers = {
 
 var classHandlers = {
   IN: (q, response, dns, typeStr, request) => {
-    log("IN");
+    debug("-> IN");
     var handler = inTypeHandlers[typeStr];
     if (!handler) {
-      log("no handler for type:", typeStr);
+      warn("no handler for type:", typeStr);
       return;
     }
     handler(q, response, dns, request);
@@ -151,7 +152,7 @@ class DNSServer extends EventEmitter {
       });
       Promise.all(tasks)
       .then(() => {
-        log("<- SEND");
+        debug("<- SEND num answers:", response.answer.length);
         response.send();
       })
       .catch((e) => {
