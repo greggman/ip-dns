@@ -57,6 +57,12 @@ class DNSServer extends EventEmitter {
     }
   }
 
+  close() {
+    if (this._server) {
+      this._server.close();
+    }
+  }
+
   _start() {
     // force at least 1 tick so events don't get emitted
     // before users have a chance to listen for them
