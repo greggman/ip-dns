@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^2.2.0",
+    "mongodb": "^2.1.18",
     "native-dns": "^0.7.0",
     "rfc-3548-b32": "0.0.2"
   },
@@ -26,6 +27,7 @@
     "grunt-eslint": "^18.1.0",
     "load-grunt-tasks": "^3.5.0",
     "mocha": "^2.4.5",
+    "mongodb-prebuilt": "git+https://github.com/greggman/mongodb-prebuilt.git#5272932",
     "should": "^8.3.1"
   }
 }
