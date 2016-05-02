@@ -4,6 +4,9 @@ const DNSServer = require('./ip-dns');
 const fs = require('fs');
 const path = require('path');
 
+var log = console.log.bind(console);  // eslint-disable-line
+var error = console.error.bind(console);  // eslint-disable-line
+
 var mongodbPrebuilt;
 var start = (callback) => {
   process.nextTick(callback);
@@ -12,7 +15,7 @@ var start = (callback) => {
 try {
   mongodbPrebuilt = require('mongodb-prebuilt');
 } catch (e) {
-  console.log("--use real db--");
+  log("--use real db--");
 }
 
 if (mongodbPrebuilt) {
@@ -31,21 +34,12 @@ if (mongodbPrebuilt) {
   };
 }
 
-start(function(err) {
-  if (err) {
-    console.error("could not start mongo:", err);
-    process.exitCode = 1;
-  } else {
-    startDNSServer();
-  }
-});
-
 function reportListening(options) {
-  console.log(options.tcp ? "tcp" : "udp", "listening on:", options.address, options.port);
+  log(options.tcp ? "tcp" : "udp", "listening on:", options.address, options.port);
 }
 
 function startDNSServer() {
-  console.log("--start dns server");
+  log("--start dns server");
   var udpOptions = {
     address: "0.0.0.0",
     port: 4444,
@@ -58,11 +52,20 @@ function startDNSServer() {
     address: "0.0.0.0",
     port: 4444,
     tcp: true,
-  }
+  };
   let tcpDnsServer = new DNSServer(tcpOptions);
   tcpDnsServer.on('listening', () => {
     reportListening(tcpOptions);
   });
 }
+
+start(function(err) {
+  if (err) {
+    error("could not start mongo:", err);
+    process.exitCode = 1;
+  } else {
+    startDNSServer();
+  }
+});
 
 

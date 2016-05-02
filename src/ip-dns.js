@@ -50,10 +50,10 @@ var inTypeHandlers = {
     debug("-> A");
     return dnsdb.get(question.name, 'A')
     .then((dnsRecord) => {
-      response.answer.push(dns.A({
+      response.answer.push(dns.A({  // eslint-disable-line
         name: question.name,
         address: dnsRecord.content,
-        ttl: 1,
+        ttl: ttl,
       }));
     });
   },
@@ -61,10 +61,10 @@ var inTypeHandlers = {
     debug("-> AAAA");
     return dnsdb.get(question.name, 'AAAA')
     .then((dnsRecord) => {
-      response.answer.push(dns.AAAA({
+      response.answer.push(dns.AAAA({  // eslint-disable-line
         name: question.name,
         address: dnsRecord.content,
-        ttl: 1,
+        ttl: ttl,
       }));
     });
   },
@@ -74,10 +74,10 @@ var inTypeHandlers = {
     .then((dnsRecord) => {
       var parts = dnsRecord.content.match(split255RE);
       parts.forEach((part) => {
-        response.answer.push(dns.TXT({
+        response.answer.push(dns.TXT({  // eslint-disable-line
           name: question.name,
           data: [part],
-          ttl: 1,
+          ttl: ttl,
         }));
       });
     });
@@ -116,7 +116,9 @@ class DNSServer extends EventEmitter {
   _start() {
     // force at least 1 tick so events don't get emitted
     // before users have a chance to listen for them
-    process.nextTick(() => { this._init(); });
+    process.nextTick(() => {
+      this._init();
+    });
   }
 
   _init() {
