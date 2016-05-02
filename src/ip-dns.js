@@ -32,6 +32,7 @@
 
 const debug = require('debug')('ip-dns');
 const dns = require('native-dns');
+const EventEmitter = require('events').EventEmitter;
 const fs = require('fs');
 const DNSDb = require('./dns-db');
 
@@ -96,13 +97,12 @@ var classHandlers = {
   },
 };
 
-
-
-// This DNS server just servers the same ip address for all domains.
 // options:
-//   address: ip address to report
-class DNSServer {
+//   address: ip address listen on: default 127.0.0.1
+//   port: port to listen on. defaut: 53
+class DNSServer extends EventEmitter {
   constructor(options) {
+    super();
     this.options = options || { };
 
     if (process.platform === 'darwin') {
@@ -113,6 +113,12 @@ class DNSServer {
   }
 
   _start() {
+    // force at least 1 tick so events don't get emitted
+    // before users have a chance to listen for them
+    process.nextTick(() => { this._init(); });
+  }
+
+  _init() {
     var options = this.options;
     //for (let key in dns) {
     //  log("dns.", key);
@@ -123,10 +129,9 @@ class DNSServer {
     var server = options.tcp ? dns.createTCPServer() : dns.createUDPServer();
 
     var port = options.port || 53;
+    var address = options.address || '127.0.0.1';
 
-    var address = options.address || '0.0.0.0';
-
-    server.on('request', function(request, response) {
+    server.on('request', (request, response) => {
       //debug("response: " + address + " : " + request.question[0].name);
       var tasks = request.question.map((q, ndx) => {
         var classStr = dns.consts.QCLASS_TO_NAME[q.class];
@@ -154,25 +159,28 @@ class DNSServer {
       });
     });
 
-    server.on('socketError', function(err /*, socket */) {
+    server.on('socketError', (err /*, socket */) => {
       error(err);
+      this.emit('error', err);
     });
 
-    server.on('error', function(err, msg /* , response */) {
+    server.on('error', (err, msg /* , response */) => {
       error(err, msg);
+      this.emit('error', err, msg);
     });
 
-    server.on('listening', function() {
-      log("serving dns to: " + address + ":" + port);
+    server.on('listening', () => {
+      this.emit('listening');
     });
 
     try {
-      server.serve(port);
+      server.serve(port, address);
     } catch (e) {
       error(e);
       if (e.stack) {
         error(e.stack);
       }
+      this.emit('error', err, msg);
     }
   }
 
